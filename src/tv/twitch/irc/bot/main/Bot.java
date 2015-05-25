@@ -8,39 +8,33 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import tv.twitch.irc.bot.config.Config;
+import tv.twitch.irc.bot.thread.Uptime;
 import tv.twitch.irc.bot.util.Alerter;
 
 public class Bot extends PircBot {
 
-  private long uptime;
-  public ArrayList<Alerter> warnings = new ArrayList<Alerter>();
+  private Uptime uptime = new Uptime();
+  private Thread thread = new Thread(uptime);
+  private ArrayList<Alerter> warnings = new ArrayList<Alerter>();
 
   public Bot() {
     this.setName(Config.BOT_NAME);
     this.op("#" + Config.CHANNEL_NAME, Config.BOT_NAME);
-    uptime = 0;
-  }
-
-  /**
-   * Get the current uptime
-   *
-   * @return
-   */
-  public long getUptime() {
-    return this.uptime;
   }
 
   @Override
   protected void onConnect() {
-    // TODO : Start uptime thread, end it on dc
+    thread.start();
     this.sendMessage("#" + Config.CHANNEL_NAME, "Hello everyone!");
     this.sendMessage("#" + Config.CHANNEL_NAME, "I am " + Config.BOT_NAME);
     this.sendMessage("#" + Config.CHANNEL_NAME,
         "And i am here to ensure that you have a great time!");
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   protected void onDisconnect() {
+    thread.stop();
     this.sendMessage("#" + Config.CHANNEL_NAME, "Bye everyone!");
     this.sendMessage("#" + Config.CHANNEL_NAME, Config.BOT_NAME + " singing out!");
   }
@@ -58,10 +52,10 @@ public class Bot extends PircBot {
   @Override
   protected void onMessage(String channel, String sender, String login, String hostname,
       String message) {
-    if (message.startsWith("!")) {
+    if (message.startsWith("!")) { // user commands
       switch (message) {
         case "!uptime":
-          this.sendMessage(channel, "Up for " + this.getUptime());
+          this.sendMessage(channel, "Up for " + uptime.getTime());
           break;
         case "!twitter":
           this.sendMessage(channel, Config.TWITTER);
@@ -72,6 +66,10 @@ public class Bot extends PircBot {
         case "!instagram":
           this.sendMessage(channel, Config.INSTAGRAM);
           break;
+      }
+    } else if (message.startsWith("*")) { // mod commands
+      switch (message) {
+
       }
     } else {
       handleCursing(channel, sender, message);
