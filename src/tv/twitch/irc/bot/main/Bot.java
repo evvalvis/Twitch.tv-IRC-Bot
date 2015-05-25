@@ -9,8 +9,21 @@ import tv.twitch.irc.bot.config.Config;
 
 public class Bot extends PircBot {
 
+  private long uptime;
+
   public Bot() {
     this.setName(Config.BOT_NAME);
+    this.op("#" + Config.CHANNEL_NAME, Config.BOT_NAME);
+    this.uptime = 0;
+  }
+
+  /**
+   * Get the seconds of uptime
+   * 
+   * @return
+   */
+  public long getUptime() {
+    return this.uptime;
   }
 
   @Override
@@ -29,23 +42,25 @@ public class Bot extends PircBot {
 
   @Override
   protected void onServerResponse(int code, String response) {
-
+    // TODO
   }
 
   @Override
   protected void onUserList(String channel, User[] users) {
-
+    super.onUserList(channel, users);
   }
 
   @Override
   protected void onMessage(String channel, String sender, String login, String hostname,
       String message) {
+    if (message.startsWith("!")) {
 
+    }
   }
 
   @Override
   protected void onPrivateMessage(String sender, String login, String hostname, String message) {
-
+    this.sendMessage(sender, "You may not send private messages to me!");
   }
 
   @Override
