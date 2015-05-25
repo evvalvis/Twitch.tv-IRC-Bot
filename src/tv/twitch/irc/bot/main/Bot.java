@@ -12,15 +12,27 @@ import tv.twitch.irc.bot.util.Alerter;
 
 public class Bot extends PircBot {
 
+  private long uptime;
   public ArrayList<Alerter> warnings = new ArrayList<Alerter>();
 
   public Bot() {
     this.setName(Config.BOT_NAME);
     this.op("#" + Config.CHANNEL_NAME, Config.BOT_NAME);
+    uptime = 0;
+  }
+
+  /**
+   * Get the current uptime
+   *
+   * @return
+   */
+  public long getUptime() {
+    return this.uptime;
   }
 
   @Override
   protected void onConnect() {
+    // TODO : Start uptime thread, end it on dc
     this.sendMessage("#" + Config.CHANNEL_NAME, "Hello everyone!");
     this.sendMessage("#" + Config.CHANNEL_NAME, "I am " + Config.BOT_NAME);
     this.sendMessage("#" + Config.CHANNEL_NAME,
@@ -47,29 +59,53 @@ public class Bot extends PircBot {
   protected void onMessage(String channel, String sender, String login, String hostname,
       String message) {
     if (message.startsWith("!")) {
-
+      switch (message) {
+        case "!uptime":
+          this.sendMessage(channel, "Up for " + this.getUptime());
+          break;
+        case "!twitter":
+          this.sendMessage(channel, Config.TWITTER);
+          break;
+        case "!youtube":
+          this.sendMessage(channel, Config.YOUTUBE);
+          break;
+        case "!instagram":
+          this.sendMessage(channel, Config.INSTAGRAM);
+          break;
+      }
     } else {
-      if (Config.ALLOW_WORD_FILTER) {
-        for (String s : Config.CURSE_WORDS_LIST) {
-          if (message.contains(s)) {
-            this.sendMessage(sender, "Dont use curse words! Warning!");
-            boolean userExists = false;
-            for (Alerter a : warnings) {
-              if (a.getUser().equals(sender)) {
-                a.warning();
-                if (a.getWarnings() >= 3) {
-                  this.sendMessage(sender, "Sorry " + sender
-                      + " you are banned from the channel. Behave yourself!");
-                  this.ban("#" + Config.CHANNEL_NAME, sender);
-                }
-                userExists = true;
-                break;
+      handleCursing(channel, sender, message);
+    }
+  }
+
+  /**
+   * This method handles cursing by a user
+   *
+   * @param channel
+   * @param sender
+   * @param message
+   */
+  private void handleCursing(String channel, String sender, String message) {
+    if (Config.ALLOW_WORD_FILTER) {
+      for (String s : Config.CURSE_WORDS_LIST) {
+        if (message.contains(s)) {
+          this.sendMessage(sender, "Dont use curse words! Warning!");
+          boolean userExists = false;
+          for (Alerter a : warnings) {
+            if (a.getUser().equals(sender)) {
+              a.warning();
+              if (a.getWarnings() >= 3) {
+                this.sendMessage(sender, "Sorry " + sender
+                    + " you are banned from the channel. Behave yourself!");
+                this.ban(channel, sender);
               }
+              userExists = true;
+              break;
             }
-            if (!userExists) {
-              Alerter alerter = new Alerter(sender);
-              warnings.add(alerter);
-            }
+          }
+          if (!userExists) {
+            Alerter alerter = new Alerter(sender);
+            warnings.add(alerter);
           }
         }
       }

@@ -14,6 +14,9 @@ public class Config {
   public static boolean ALLOW_WORD_FILTER;
   public static String CURSE_WORDS;
   public static List<String> CURSE_WORDS_LIST;
+  public static String YOUTUBE;
+  public static String TWITTER;
+  public static String INSTAGRAM;
 
   /**
    * This method loads the config properties file
@@ -35,6 +38,9 @@ public class Config {
         for (String word : CURSE_WORDS.split(",")) {
           CURSE_WORDS_LIST.add(word);
         }
+        YOUTUBE = properties.getProperty("youtube");
+        TWITTER = properties.getProperty("twitter");
+        INSTAGRAM = properties.getProperty("instagram");
       } else {
         throw new FileNotFoundException("property file '" + file + "' not found in the classpath");
       }
