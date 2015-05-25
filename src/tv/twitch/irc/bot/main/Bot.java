@@ -15,12 +15,16 @@ public class Bot extends PircBot {
 
   @Override
   protected void onConnect() {
-
+    this.sendMessage("#" + Config.CHANNEL_NAME, "Hello everyone!");
+    this.sendMessage("#" + Config.CHANNEL_NAME, "I am " + Config.BOT_NAME);
+    this.sendMessage("#" + Config.CHANNEL_NAME,
+        "And i am here to ensure that you have a great time!");
   }
 
   @Override
   protected void onDisconnect() {
-
+    this.sendMessage("#" + Config.CHANNEL_NAME, "Bye everyone!");
+    this.sendMessage("#" + Config.CHANNEL_NAME, Config.BOT_NAME + " singing out!");
   }
 
   @Override

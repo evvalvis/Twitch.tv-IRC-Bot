@@ -10,6 +10,7 @@ import java.util.Properties;
 public class Config {
 
   public static String BOT_NAME;
+  public static String CHANNEL_NAME;
   public static boolean ALLOW_WORD_FILTER;
   public static String CURSE_WORDS;
   public static List<String> CURSE_WORDS_LIST;
@@ -27,6 +28,7 @@ public class Config {
       if (inputStream != null) {
         properties.load(inputStream);
         BOT_NAME = properties.getProperty("bot_name");
+        CHANNEL_NAME = properties.getProperty("channel_name");
         ALLOW_WORD_FILTER = Boolean.parseBoolean(properties.getProperty("allow_word_filter"));
         CURSE_WORDS = properties.getProperty("curse_word_list");
         CURSE_WORDS_LIST = new ArrayList<String>();
