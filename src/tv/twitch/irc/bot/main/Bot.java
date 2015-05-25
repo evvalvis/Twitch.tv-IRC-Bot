@@ -1,29 +1,22 @@
 package tv.twitch.irc.bot.main;
 
+import java.util.ArrayList;
+
 import org.jibble.pircbot.DccChat;
 import org.jibble.pircbot.DccFileTransfer;
 import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import tv.twitch.irc.bot.config.Config;
+import tv.twitch.irc.bot.util.Alerter;
 
 public class Bot extends PircBot {
 
-  private long uptime;
+  public ArrayList<Alerter> warnings = new ArrayList<Alerter>();
 
   public Bot() {
     this.setName(Config.BOT_NAME);
     this.op("#" + Config.CHANNEL_NAME, Config.BOT_NAME);
-    this.uptime = 0;
-  }
-
-  /**
-   * Get the seconds of uptime
-   * 
-   * @return
-   */
-  public long getUptime() {
-    return this.uptime;
   }
 
   @Override
@@ -55,6 +48,31 @@ public class Bot extends PircBot {
       String message) {
     if (message.startsWith("!")) {
 
+    } else {
+      if (Config.ALLOW_WORD_FILTER) {
+        for (String s : Config.CURSE_WORDS_LIST) {
+          if (message.contains(s)) {
+            this.sendMessage(sender, "Dont use curse words! Warning!");
+            boolean userExists = false;
+            for (Alerter a : warnings) {
+              if (a.getUser().equals(sender)) {
+                a.warning();
+                if (a.getWarnings() >= 3) {
+                  this.sendMessage(sender, "Sorry " + sender
+                      + " you are banned from the channel. Behave yourself!");
+                  this.ban("#" + Config.CHANNEL_NAME, sender);
+                }
+                userExists = true;
+                break;
+              }
+            }
+            if (!userExists) {
+              Alerter alerter = new Alerter(sender);
+              warnings.add(alerter);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -65,13 +83,13 @@ public class Bot extends PircBot {
 
   @Override
   protected void onAction(String sender, String login, String hostname, String target, String action) {
-
+    super.onAction(sender, login, hostname, target, action);
   }
 
   @Override
   protected void onNotice(String sourceNick, String sourceLogin, String sourceHostname,
       String target, String notice) {
-
+    super.onNotice(sourceNick, sourceLogin, sourceHostname, target, notice);
   }
 
   @Override
