@@ -10,7 +10,10 @@ import java.util.Properties;
 public class Config {
 
   public static String BOT_NAME;
+  public static String BROADCASTER;
   public static String CHANNEL_NAME;
+  public static String USER_COMMAND_CHAR;
+  public static String MOD_COMMAND_CHAR;
   public static boolean ALLOW_WORD_FILTER;
   public static String CURSE_WORDS;
   public static List<String> CURSE_WORDS_LIST;
@@ -31,7 +34,10 @@ public class Config {
       if (inputStream != null) {
         properties.load(inputStream);
         BOT_NAME = properties.getProperty("bot_name");
+        BROADCASTER = properties.getProperty("broadcaster");
         CHANNEL_NAME = properties.getProperty("channel_name");
+        USER_COMMAND_CHAR = properties.getProperty("user_command_char");
+        MOD_COMMAND_CHAR = properties.getProperty("mod_command_char");
         ALLOW_WORD_FILTER = Boolean.parseBoolean(properties.getProperty("allow_word_filter"));
         CURSE_WORDS = properties.getProperty("curse_word_list");
         CURSE_WORDS_LIST = new ArrayList<String>();

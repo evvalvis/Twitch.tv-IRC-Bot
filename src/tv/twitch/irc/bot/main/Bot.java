@@ -1,6 +1,7 @@
 package tv.twitch.irc.bot.main;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import org.jibble.pircbot.DccChat;
 import org.jibble.pircbot.DccFileTransfer;
@@ -15,6 +16,10 @@ public class Bot extends PircBot {
 
   private Uptime uptime = new Uptime();
   private Thread thread = new Thread(uptime);
+  private String broadcaster = Config.BROADCASTER;
+  private String ucs = Config.USER_COMMAND_CHAR;
+  private String mcs = Config.MOD_COMMAND_CHAR;
+  private StringTokenizer tokenizer;
   private ArrayList<Alerter> warnings = new ArrayList<Alerter>();
 
   public Bot() {
@@ -52,28 +57,97 @@ public class Bot extends PircBot {
   @Override
   protected void onMessage(String channel, String sender, String login, String hostname,
       String message) {
-    if (message.startsWith("!")) { // user commands
-      switch (message) {
-        case "!uptime":
+    if (message.startsWith(ucs)) { // user commands
+      switch (message.substring(1)) {
+        case "uptime":
           this.sendMessage(channel, "Up for " + uptime.getTime());
           break;
-        case "!twitter":
+        case "twitter":
           this.sendMessage(channel, Config.TWITTER);
           break;
-        case "!youtube":
+        case "youtube":
           this.sendMessage(channel, Config.YOUTUBE);
           break;
-        case "!instagram":
+        case "instagram":
           this.sendMessage(channel, Config.INSTAGRAM);
           break;
       }
-    } else if (message.startsWith("*")) { // mod commands
-      switch (message) {
-
+    } else if (message.startsWith(mcs)) { // mod commands
+      User[] users = this.getUsers(channel);
+      boolean moderator = false;
+      for (User user : users) {
+        if (user.getNick().equals(sender) && user.isOp()) {
+          moderator = true;
+          break;
+        }
       }
-    } else {
+      if (!moderator) {
+        this.sendMessage(channel, sender + " you cannot use mod commands without being a mod!!");
+      } else {
+        if (message.substring(1).startsWith("kick")) {
+          handleKick(channel, sender, message);
+        } else if (message.substring(1).startsWith("ban")) {
+          handleBan(channel, sender, message);
+        } else if (message.substring(1).startsWith("unban")) {
+          handleUnBan(channel, sender, message);
+        }
+      }
+    } else { // normal chat
       handleCursing(channel, sender, message);
     }
+  }
+
+  /**
+   * This method bans a user the mod has chosen
+   * 
+   * @param channel
+   * @param sender
+   * @param message
+   */
+  private void handleUnBan(String channel, String sender, String message) {
+    tokenizer = new StringTokenizer(message);
+    tokenizer.nextToken();
+    String name = tokenizer.nextToken();
+    this.sendMessage(channel, "User " + name + " was unbanned from the channel by " + sender);
+    this.unBan(channel, name);
+  }
+
+  /**
+   * This method bans a user the mod has chosen
+   * 
+   * @param channel
+   * @param sender
+   * @param message
+   */
+  private void handleBan(String channel, String sender, String message) {
+    tokenizer = new StringTokenizer(message);
+    tokenizer.nextToken();
+    String name = tokenizer.nextToken();
+    if (name.equals(this.broadcaster)) {
+      this.sendMessage(channel, "You cannot ban the broadcaster " + sender);
+      return;
+    }
+    this.sendMessage(channel, "User " + name + " was banned from the channel by " + sender);
+    this.ban(channel, name);
+  }
+
+  /**
+   * This method kicks a user the mod has chosen
+   * 
+   * @param channel
+   * @param sender
+   * @param message
+   */
+  private void handleKick(String channel, String sender, String message) {
+    tokenizer = new StringTokenizer(message);
+    tokenizer.nextToken();
+    String name = tokenizer.nextToken();
+    if (name.equals(this.broadcaster)) {
+      this.sendMessage(channel, "You cannot kick the broadcaster " + sender);
+      return;
+    }
+    this.sendMessage(channel, "User " + name + " was kicked from the channel by " + sender);
+    this.kick(channel, name);
   }
 
   /**
@@ -96,6 +170,7 @@ public class Bot extends PircBot {
                 this.sendMessage(sender, "Sorry " + sender
                     + " you are banned from the channel. Behave yourself!");
                 this.ban(channel, sender);
+                a.clear();
               }
               userExists = true;
               break;
