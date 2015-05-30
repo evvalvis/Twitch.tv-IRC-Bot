@@ -9,6 +9,7 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import tv.twitch.irc.bot.config.Config;
+import tv.twitch.irc.bot.engines.Poll;
 import tv.twitch.irc.bot.engines.Raffle;
 import tv.twitch.irc.bot.thread.Uptime;
 import tv.twitch.irc.bot.util.Alerter;
@@ -106,12 +107,25 @@ public class Bot extends PircBot {
       handleGreetings(message.toLowerCase(), sender);
       if (Config.ALLOW_RAFFLES)
         handleRaffle(message, sender);
+      if (Config.ALLOW_POLLS)
+        handlePoll(message);
     }
   }
 
   /**
-   * Handles an ongoing raffle
+   * This method handles an ongoing poll
    * 
+   * @param message
+   */
+  private void handlePoll(String message) {
+    // when we add the gui this will be completed as the raffle engine
+    Poll poll = new Poll("poll", null);
+    poll.vote(message);
+  }
+
+  /**
+   * Handles an ongoing raffle
+   *
    * @param message
    * @param sender
    */
