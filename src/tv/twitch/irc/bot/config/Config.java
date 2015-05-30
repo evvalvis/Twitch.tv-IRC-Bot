@@ -20,6 +20,7 @@ public class Config {
   public static String YOUTUBE;
   public static String TWITTER;
   public static String INSTAGRAM;
+  public static boolean ALLOW_RAFFLES;
 
   /**
    * This method loads the config properties file
@@ -47,6 +48,7 @@ public class Config {
         YOUTUBE = properties.getProperty("youtube");
         TWITTER = properties.getProperty("twitter");
         INSTAGRAM = properties.getProperty("instagram");
+        ALLOW_RAFFLES = Boolean.parseBoolean(properties.getProperty("allow_raffles"));
       } else {
         throw new FileNotFoundException("property file '" + file + "' not found in the classpath");
       }

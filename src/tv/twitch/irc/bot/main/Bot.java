@@ -9,6 +9,7 @@ import org.jibble.pircbot.PircBot;
 import org.jibble.pircbot.User;
 
 import tv.twitch.irc.bot.config.Config;
+import tv.twitch.irc.bot.engines.Raffle;
 import tv.twitch.irc.bot.thread.Uptime;
 import tv.twitch.irc.bot.util.Alerter;
 
@@ -103,7 +104,22 @@ public class Bot extends PircBot {
     } else { // normal chat
       handleCursing(channel, sender, message);
       handleGreetings(message.toLowerCase(), sender);
+      if (Config.ALLOW_RAFFLES)
+        handleRaffle(message, sender);
     }
+  }
+
+  /**
+   * Handles an ongoing raffle
+   * 
+   * @param message
+   * @param sender
+   */
+  private void handleRaffle(String message, String sender) {
+    // when we add the gui we will add the keyword
+    Raffle raffle = new Raffle("giveaway", "keyword");
+    if (message.equals(raffle.getKeyword()))
+      raffle.addUser(sender);
   }
 
   /**
